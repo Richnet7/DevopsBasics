@@ -17,12 +17,12 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 echo 'Cloning repository..'
-                withCredentials([usernamePassword(credentialsId: 'theitern', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'Richnet7', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     script {
                         // Remove existing repository clone if present
                         sh "rm -rf /var/lib/jenkins/workspace/cicd-pipeline/devops-basics"
                         // Clone repository
-                        git credentialsId: 'theitern', url: env.REPO_URL, branch: 'master', dir: '/var/lib/jenkins/workspace/cicd-pipeline/devops-basics'
+                        git credentialsId: 'Richnet7', url: env.REPO_URL, branch: 'master', dir: '/var/lib/jenkins/workspace/cicd-pipeline/devops-basics'
                     }
                 }
             }
