@@ -7,7 +7,7 @@ pipeline {
         DOCKER_HUB_CREDENTIALS = 'dockerhub_credentials_id'
         IMAGE_TAG = "${env.BUILD_NUMBER}" // Dynamic tag based on build number
         SSH_CREDENTIALS_ID = 'ssh-credentials-id'
-        REPO_URL = 'https://github.com/theitern/devops-basics.git'
+        REPO_URL = 'https://github.com/Richnet7/DevopsBasics.git'
     }
     tools {
         jdk 'myjava'
