@@ -61,7 +61,7 @@ pipeline {
                 sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
                     sh """
                     ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'rm -f /home/ubuntu/webapp.war'
-                    scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
+                    scp -o StrictHostKeyChecking=no '/var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war' ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
                     """
                 }
             }
