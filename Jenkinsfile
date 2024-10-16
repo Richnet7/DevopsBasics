@@ -55,13 +55,14 @@ pipeline {
                 }
             }
         }
-        stage('Copy WAR to Docker Server') {
+        stage('Copy WAR and Dockerfile to Docker Server') {
             steps {
-                echo 'Copying WAR to Docker Server..'
+                echo 'Copying WAR and Dockerfile to Docker Server..'
                 sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'rm -f /home/ubuntu/webapp.war'
+                    ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'rm -f /home/ubuntu/webapp.war /home/ubuntu/Dockerfile'
                     scp -o StrictHostKeyChecking=no '/var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war' ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
+                    scp -o StrictHostKeyChecking=no '/var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/Dockerfile' ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
                     """
                 }
             }
@@ -73,19 +74,6 @@ pipeline {
                     sh """
                     ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'docker build -t ${env.DOCKER_HUB_REPO}:${env.IMAGE_TAG} /home/ubuntu'
                     """
-                }
-            }
-        }
-        stage('Push Docker Image') {
-            steps {
-                echo 'Pushing Docker Image..'
-                sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
-                    withCredentials([usernamePassword(credentialsId: env.DOCKER_HUB_CREDENTIALS, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                        sh """
-                        ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'echo ${DOCKER_PASSWORD} | docker login -u ${DOCKER_USERNAME} --password-stdin'
-                        ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'docker push ${env.DOCKER_HUB_REPO}:${env.IMAGE_TAG}'
-                        """
-                    }
                 }
             }
         }
