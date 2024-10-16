@@ -19,22 +19,19 @@ pipeline {
                 echo 'Cloning repository..'
                 withCredentials([usernamePassword(credentialsId: 'Richnet7', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     script {
-                        sh "rm -rf /var/lib/jenkins/workspace/cicd-pipeline/devops-basics"
-                        git credentialsId: 'Richnet7', url: env.REPO_URL, branch: 'master', dir: '/var/lib/jenkins/workspace/cicd-pipeline/devops-basics'
+                        sh "rm -rf ${env.WORKSPACE}/devops-basics"
+                        git credentialsId: 'Richnet7', url: env.REPO_URL, branch: 'master', dir: "${env.WORKSPACE}/devops-basics"
                     }
                 }
             }
         }
-        stage('Compile') {
+        stage('Compile and Package') {
             steps {
-                echo 'Compiling..'
-                sh 'mvn compile'
-            }
-        }
-        stage('Package') {
-            steps {
-                echo 'Packaging..'
-                sh 'mvn package'
+                echo 'Compiling and Packaging..'
+                dir("${env.WORKSPACE}/devops-basics/webapp") {
+                    sh 'mvn compile'
+                    sh 'mvn package'
+                }
             }
         }
         stage('Clear Docker Server') {
@@ -59,6 +56,10 @@ pipeline {
                 sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
                     script {
                         def warFileExists = sh(script: "ls -la /var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war", returnStatus: true) == 0
+                        def targetDirExists = sh(script: "ls -la /var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target", returnStatus: true) == 0
+                        if (!targetDirExists) {
+                            error 'Target directory not found, aborting the pipeline.'
+                        }
                         if (!warFileExists) {
                             error 'WAR file not found, aborting the pipeline.'
                         }
@@ -76,7 +77,7 @@ pipeline {
                 echo 'Building Docker Image..'
                 sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'docker build -t ${env.DOCKER_HUB_REPO}:${env.IMAGE_TAG} /home/ubuntu'
+                    ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'docker build -t ${env.DOCKER_HUB_REPO}:${env.IMAGE_TAG} -f /home/ubuntu/Dockerfile /home/ubuntu'
                     """
                 }
             }
@@ -98,6 +99,10 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed!'
+            script {
+                // Cleanup actions can be added here
+                // e.g., stop and remove containers
+            }
         }
     }
 }
