@@ -19,9 +19,7 @@ pipeline {
                 echo 'Cloning repository..'
                 withCredentials([usernamePassword(credentialsId: 'Richnet7', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     script {
-                        // Remove existing repository clone if present
                         sh "rm -rf /var/lib/jenkins/workspace/cicd-pipeline/devops-basics"
-                        // Clone repository
                         git credentialsId: 'Richnet7', url: env.REPO_URL, branch: 'master', dir: '/var/lib/jenkins/workspace/cicd-pipeline/devops-basics'
                     }
                 }
@@ -55,15 +53,21 @@ pipeline {
                 }
             }
         }
-        stage('Copy WAR and Dockerfile to Docker Server') {
+        stage('Copy WAR to Docker Server') {
             steps {
-                echo 'Copying WAR and Dockerfile to Docker Server..'
+                echo 'Copying WAR to Docker Server..'
                 sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
-                    sh """
-                    ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'rm -f /home/ubuntu/webapp.war /home/ubuntu/Dockerfile'
-                    scp -o StrictHostKeyChecking=no '/var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war' ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
-                    scp -o StrictHostKeyChecking=no '/var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/Dockerfile' ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
-                    """
+                    script {
+                        def warFileExists = sh(script: "ls -la /var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war", returnStatus: true) == 0
+                        if (!warFileExists) {
+                            error 'WAR file not found, aborting the pipeline.'
+                        }
+
+                        sh """
+                        ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'rm -f /home/ubuntu/webapp.war'
+                        scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
+                        """
+                    }
                 }
             }
         }
