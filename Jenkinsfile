@@ -3,7 +3,7 @@ pipeline {
     environment {
         DOCKER_SERVER = '18.219.94.82'
         DOCKER_USER = 'ubuntu'
-        DOCKER_HUB_REPO = 'akinaregbesola/class_images'
+        DOCKER_HUB_REPO = 'richnet7/richnet'
         DOCKER_HUB_CREDENTIALS = 'dockerhub_credentials_id'
         IMAGE_TAG = "${env.BUILD_NUMBER}" // Dynamic tag based on build number
         SSH_CREDENTIALS_ID = 'ssh-credentials-id'
