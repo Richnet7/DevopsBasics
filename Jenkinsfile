@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_SERVER = '18.219.94.82'
+        DOCKER_SERVER = '3.142.77.228'
         DOCKER_USER = 'ubuntu'
         DOCKER_HUB_REPO = 'richnet7/richnet'
         DOCKER_HUB_CREDENTIALS = 'dockerhub_credentials_id'
