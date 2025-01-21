@@ -17,10 +17,10 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 echo 'Cloning repository..'
-                withCredentials([usernamePassword(credentialsId: 'Richnet7', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                withCredentials([usernamePassword(credentialsId: 'Richnet_github_credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                     script {
                         sh "rm -rf ${env.WORKSPACE}/devops-basics"
-                        git credentialsId: 'Richnet7', url: env.REPO_URL, branch: 'master', dir: "${env.WORKSPACE}/devops-basics"
+                        git credentialsId: 'Richnet_github_credentials', url: env.REPO_URL, branch: 'master', dir: "${env.WORKSPACE}/devops-basics"
                     }
                 }
             }
