@@ -28,7 +28,7 @@ pipeline {
         stage('Compile and Package') {
             steps {
                 echo 'Compiling and Packaging..'
-                dir("${env.WORKSPACE}/devops-basics/webapp") {
+                dir("${env.WORKSPACE}/devops-basics") {
                     sh 'mvn compile'
                     sh 'mvn package'
                 }
