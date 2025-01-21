@@ -55,8 +55,8 @@ pipeline {
                 echo 'Copying WAR to Docker Server..'
                 sshagent(credentials: [env.SSH_CREDENTIALS_ID]) {
                     script {
-                        def warFileExists = sh(script: "ls -la /var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war", returnStatus: true) == 0
-                        def targetDirExists = sh(script: "ls -la /var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target", returnStatus: true) == 0
+                        def warFileExists = fileExists("${env.WORKSPACE}/devops-basics/webapp/target/webapp.war")
+                        def targetDirExists = fileExists("${env.WORKSPACE}/devops-basics/webapp/target")
                         if (!targetDirExists) {
                             error 'Target directory not found, aborting the pipeline.'
                         }
@@ -66,7 +66,7 @@ pipeline {
 
                         sh """
                         ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'rm -f /home/ubuntu/webapp.war'
-                        scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/${env.JOB_NAME}/webapp/target/webapp.war ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
+                        scp -o StrictHostKeyChecking=no ${env.WORKSPACE}/devops-basics/webapp/target/webapp.war ${env.DOCKER_USER}@${env.DOCKER_SERVER}:/home/ubuntu/
                         """
                     }
                 }
@@ -101,7 +101,7 @@ pipeline {
             echo 'Pipeline failed!'
             script {
                 // Cleanup actions can be added here
-                // e.g., stop and remove containers
+                sh "ssh -o StrictHostKeyChecking=no ${env.DOCKER_USER}@${env.DOCKER_SERVER} 'docker rm -f our_app_container || true'"
             }
         }
     }
