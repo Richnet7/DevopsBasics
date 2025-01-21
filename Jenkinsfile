@@ -1,9 +1,9 @@
 pipeline {
     agent any
     environment {
-        DOCKER_SERVER = '3.142.77.228'
+        DOCKER_SERVER = '18.118.30.144'
         DOCKER_USER = 'ubuntu'
-        DOCKER_HUB_REPO = 'richnet7/richnet'
+        DOCKER_HUB_REPO = 'richnet7/richnet:tagname'
         DOCKER_HUB_CREDENTIALS = 'dockerhub_credentials_id'
         IMAGE_TAG = "${env.BUILD_NUMBER}" // Dynamic tag based on build number
         SSH_CREDENTIALS_ID = 'ssh-credentials-id'
